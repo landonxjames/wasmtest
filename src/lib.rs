@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use aws_credential_types::{cache::CredentialsCache, provider::ProvideCredentials, Credentials};
 use aws_sdk_dynamodb::{config::Region, Client};
 use aws_smithy_async::rt::sleep::{AsyncSleep, SharedAsyncSleep, Sleep};
-use aws_smithy_async::time::TimeSource;
+use aws_smithy_async::time::{SharedTimeSource, TimeSource};
 use aws_smithy_client::erase::DynConnector;
 use aws_smithy_http::{body::SdkBody, result::ConnectorError};
 use fluvio_wasm_timer;
@@ -91,13 +91,15 @@ impl AsyncSleep for WasmSleep {
 fn static_credential_provider() -> impl ProvideCredentials {
     // let credentials = serde_wasm_bindgen::from_value::<AwsCredentials>(retrieve_credentials())
     //     .expect("invalid credentials");
-    Credentials::from_keys("accesskey", "secretkey", Some("sessiontoken".to_string()))
+    Credentials::from_keys("fake", "fake", Some("fake".to_string()))
 }
 
 fn wasm_credentials_cache() -> CredentialsCache {
     let shared_sleep = SharedAsyncSleep::new(WasmSleep);
+    let shared_time = SharedTimeSource::new(WasmTimeSource);
     CredentialsCache::lazy_builder()
         .sleep(shared_sleep)
+        .time_source(shared_time)
         .into_credentials_cache()
 }
 
@@ -131,6 +133,7 @@ impl tower::Service<http::Request<SdkBody>> for Adapter {
 
     fn call(&mut self, req: http::Request<SdkBody>) -> Self::Future {
         let (parts, body) = req.into_parts();
+
         let uri = parts.uri.to_string();
         if self.verbose {
             log!("sending request to {}", uri);
@@ -145,10 +148,17 @@ impl tower::Service<http::Request<SdkBody>> for Adapter {
         wasm_bindgen_futures::spawn_local(async move {
             let fut = WasmHttpClient::send(parts, body);
 
-            let _ = tx.send(
-                fut.await
-                    .unwrap_or_else(|_| panic!("failure while making request to: {}", uri)),
-            );
+            // let blah = Box::pin(
+            //     reqwest::Client::new()
+            //         .request(req.method().clone(), req.uri().clone().to_string())
+            //         .body(body.bytes().unwrap())
+            //         .headers(req.headers().clone())
+            //         .send(),
+            // );
+
+            let _ = tx.send(fut.await.unwrap_or_else(|val| {
+                panic!("failure while making request to: {} \n {:#?}", uri, val)
+            }));
         });
 
         Box::pin(async move {
@@ -185,56 +195,71 @@ impl MakeRequestWasm for WasmHttpClient {
         parts: http::request::Parts,
         body: SdkBody,
     ) -> Result<http::Response<SdkBody>, JsValue> {
-        use js_sys::{Array, ArrayBuffer, Reflect, Uint8Array};
-        use wasm_bindgen_futures::JsFuture;
+        // use js_sys::{Array, ArrayBuffer, Reflect, Uint8Array};
+        // use wasm_bindgen_futures::JsFuture;
 
-        let mut opts = web_sys::RequestInit::new();
-        opts.method(parts.method.as_str());
-        opts.mode(web_sys::RequestMode::Cors);
+        // let mut opts = web_sys::RequestInit::new();
+        // opts.method(parts.method.as_str());
+        // opts.mode(web_sys::RequestMode::Cors);
 
-        let body_pinned = std::pin::Pin::new(body.bytes().unwrap());
-        if body_pinned.len() > 0 {
-            let uint_8_array = unsafe { Uint8Array::view(&body_pinned) };
-            opts.body(Some(&uint_8_array));
-        }
+        // let body_pinned = std::pin::Pin::new(body.bytes().unwrap());
+        // if body_pinned.len() > 0 {
+        //     let uint_8_array = unsafe { Uint8Array::view(&body_pinned) };
+        //     opts.body(Some(&uint_8_array));
+        // }
 
-        let request = web_sys::Request::new_with_str_and_init(&parts.uri.to_string(), &opts)?;
+        // let request = web_sys::Request::new_with_str_and_init(&parts.uri.to_string(), &opts)?;
 
-        for (name, value) in parts
-            .headers
-            .iter()
-            .map(|(n, v)| (n.as_str(), v.to_str().unwrap()))
-        {
-            request.headers().set(name, value)?;
-        }
+        // for (name, value) in parts
+        //     .headers
+        //     .iter()
+        //     .map(|(n, v)| (n.as_str(), v.to_str().unwrap()))
+        // {
+        //     request.headers().set(name, value)?;
+        // }
 
-        let window = web_sys::window().ok_or("could not get window")?;
-        let promise = window.fetch_with_request(&request);
-        let res_web = JsFuture::from(promise).await?;
-        let res_web: web_sys::Response = res_web.dyn_into().unwrap();
+        // let window = web_sys::window().ok_or("could not get window")?;
+        // let promise = window.fetch_with_request(&request);
+        // let res_web = JsFuture::from(promise).await?;
+        // let res_web: web_sys::Response = res_web.dyn_into().unwrap();
 
-        let promise_array = res_web.array_buffer()?;
-        let array = JsFuture::from(promise_array).await?;
-        let buf: ArrayBuffer = array.dyn_into().unwrap();
-        let slice = Uint8Array::new(&buf);
-        let body = slice.to_vec();
+        // let promise_array = res_web.array_buffer()?;
+        // let array = JsFuture::from(promise_array).await?;
+        // let buf: ArrayBuffer = array.dyn_into().unwrap();
+        // let slice = Uint8Array::new(&buf);
+        // let body = slice.to_vec();
 
-        let mut builder = http::Response::builder().status(res_web.status());
-        for i in js_sys::try_iter(&res_web.headers())?.unwrap() {
-            let array: Array = i?.into();
-            let values = array.values();
+        // let mut builder = http::Response::builder().status(res_web.status());
+        // for i in js_sys::try_iter(&res_web.headers())?.unwrap() {
+        //     let array: Array = i?.into();
+        //     let values = array.values();
 
-            let prop = String::from("value").into();
-            let key = Reflect::get(values.next()?.as_ref(), &prop)?
-                .as_string()
-                .unwrap();
-            let value = Reflect::get(values.next()?.as_ref(), &prop)?
-                .as_string()
-                .unwrap();
-            builder = builder.header(&key, &value);
-        }
-        let res_body = SdkBody::from(body);
-        let res = builder.body(res_body).unwrap();
-        Ok(res)
+        //     let prop = String::from("value").into();
+        //     let key = Reflect::get(values.next()?.as_ref(), &prop)?
+        //         .as_string()
+        //         .unwrap();
+        //     let value = Reflect::get(values.next()?.as_ref(), &prop)?
+        //         .as_string()
+        //         .unwrap();
+        //     builder = builder.header(&key, &value);
+        // }
+        // let res_body = SdkBody::from(body);
+        // let res = builder.body(res_body).unwrap();
+        // Ok(res)
+        let body_bytes = body.bytes().unwrap().to_vec();
+
+        let blah = reqwest::Client::new()
+            .request(parts.method, parts.uri.to_string())
+            .body(body_bytes)
+            .headers(parts.headers)
+            .send()
+            .await
+            .unwrap_or_else(|err| panic!("failure while making request: {}", err));
+        let mut builder = http::Response::builder().status(blah.status());
+        let blah_body = SdkBody::from(blah.bytes().await.unwrap());
+
+        let blah_res = builder.body(blah_body).unwrap();
+
+        Ok(blah_res)
     }
 }

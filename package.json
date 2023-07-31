@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "node-window-polyfill": "^1.0.2",
     "wasmtest": "file://./pkg"
   },
   "author": "",
