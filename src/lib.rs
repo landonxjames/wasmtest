@@ -1,8 +1,8 @@
 use async_trait::async_trait;
-use aws_credential_types::{cache::CredentialsCache, provider::ProvideCredentials, Credentials};
+use aws_credential_types::{provider::ProvideCredentials, Credentials};
 use aws_sdk_dynamodb::{config::Region, Client};
-use aws_smithy_async::rt::sleep::{AsyncSleep, SharedAsyncSleep, Sleep};
-use aws_smithy_async::time::{SharedTimeSource, TimeSource};
+use aws_smithy_async::rt::sleep::{AsyncSleep, Sleep};
+use aws_smithy_async::time::TimeSource;
 use aws_smithy_client::erase::DynConnector;
 use aws_smithy_http::{body::SdkBody, result::ConnectorError};
 use fluvio_wasm_timer;
@@ -29,7 +29,6 @@ pub async fn list_tables() -> Result<String, String> {
         .sleep_impl(WasmSleep)
         .region(Region::new("us-east-1"))
         .credentials_provider(credentials_provider)
-        .credentials_cache(wasm_credentials_cache())
         .http_connector(DynConnector::new(Adapter::new(true)))
         .load()
         .await;
@@ -85,21 +84,11 @@ impl AsyncSleep for WasmSleep {
     }
 }
 
+//TODO: figure out how to pass the Lambda env variable credentials to the WASM code
 fn static_credential_provider() -> impl ProvideCredentials {
     // let credentials = serde_wasm_bindgen::from_value::<AwsCredentials>(retrieve_credentials())
     //     .expect("invalid credentials");
     Credentials::from_keys("fake", "fake", Some("fake".to_string()))
-}
-
-fn wasm_credentials_cache() -> CredentialsCache {
-    let shared_sleep = SharedAsyncSleep::new(WasmSleep);
-    let shared_time = SharedTimeSource::new(WasmTimeSource);
-    //TODO: the time_source shouldn't actually be set here, should be inherited from
-    //config now that issue is fixed. Need to build from smithy-rs main to test
-    CredentialsCache::lazy_builder()
-        .sleep(shared_sleep)
-        .time_source(shared_time)
-        .into_credentials_cache()
 }
 
 //Code below here is all dedicated to sending the call across the sandbox barrier
