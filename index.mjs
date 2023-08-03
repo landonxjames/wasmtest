@@ -1,7 +1,7 @@
-import * as wasmMod from "./pkg/wasmtest.js";
+import * as wasmMod from "./jsbind/my-component-nowasi.mjs";
 
 Error.stackTraceLimit = Infinity;
 
-const out = await wasmMod.list_tables();
+const out = wasmMod.listTables();
 
 console.log(out);

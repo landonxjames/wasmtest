@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@bytecodealliance/jco": "^0.9.5",
     "node-window-polyfill": "^1.0.2",
+    "sync-request": "^6.1.0",
     "wasmtest": "file://./pkg"
   },
   "author": "",

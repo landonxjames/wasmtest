@@ -1,0 +1,18 @@
+package example:host
+
+interface mytypes {
+  record person {
+    first: string,
+    last: string,
+  }
+
+  makeperson: func(first: string, last: string) -> person
+  makejsonperson: func(jsonstr: string) -> person
+}
+
+world host {
+  import make-http-request: func(url: string) -> string
+  export render: func(input: string) -> string
+  export list-tables: func() -> result<string, string>
+  export mytypes
+}

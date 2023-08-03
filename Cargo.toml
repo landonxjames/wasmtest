@@ -11,24 +11,32 @@ aws-smithy-http= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk
 aws-credential-types= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-credential-types", features = ["hardcoded-credentials"] }
 aws-sdk-dynamodb = { path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/dynamodb", default-features = false }
 
-# aws-config= { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
-# aws-smithy-async= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next" }
-# aws-smithy-client= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
-# aws-smithy-http= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["event-stream"] }
-# aws-credential-types= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["hardcoded-credentials"] }
-# aws-sdk-dynamodb = { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+# # aws-config= { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+# # aws-smithy-async= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next" }
+# # aws-smithy-client= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+# # aws-smithy-http= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["event-stream"] }
+# # aws-credential-types= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["hardcoded-credentials"] }
+# # aws-sdk-dynamodb = { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
 
 async-trait = "0.1.71"
-js-sys = "0.3.64"
-wasm-bindgen = "0.2.86"
-wasm-bindgen-futures = "0.4.37"
-fluvio-wasm-timer = "0.2.5" #Using this fork of wasm-timer because it fixes a bug: https://github.com/tomaka/wasm-timer/pull/13
-serde-wasm-bindgen = "0.5.0"
+# js-sys = "0.3.64"
+# wasm-bindgen = "0.2.86"
+# wasm-bindgen-futures = "0.4.37"
+# serde-wasm-bindgen = "0.5.0"
 tower = "0.4.13"
 http = "0.2.9"
 console_error_panic_hook = "0.1.7"
 reqwest = { version = "0.11", features = ["json"] }
 
+
+
+
+
+
+
+wit-bindgen = { version = "0.9.0" }
+# pulldown-cmark = { version = "0.9.3", default-features = false }
+serde_json = "1.0.104"
 [dependencies.serde]
 version = "1.0.171"
 features = ["derive"]

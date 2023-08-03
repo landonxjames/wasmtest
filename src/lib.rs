@@ -1,26 +1,70 @@
+//WIT imports
+wit_bindgen::generate!("utils");
+use act::utils::connector_types::{HttpCallOptions, Methods};
+use act::utils::http_client;
+//Normal crate imports
 use async_trait::async_trait;
 use aws_credential_types::{provider::ProvideCredentials, Credentials};
 use aws_sdk_dynamodb::{config::Region, Client};
 use aws_smithy_async::rt::sleep::{AsyncSleep, Sleep};
 use aws_smithy_async::time::TimeSource;
 use aws_smithy_client::erase::DynConnector;
-use aws_smithy_http::{body::SdkBody, result::ConnectorError};
-use fluvio_wasm_timer;
+use aws_smithy_http::{
+    body::{Error, SdkBody},
+    result::ConnectorError,
+};
+use std::str::FromStr;
 use std::time::Duration;
-use wasm_bindgen::prelude::*;
+// use tokio::time::Delay;
+// extern crate console_error_panic_hook;
 
-extern crate console_error_panic_hook;
-
-//TODO: replace this with something that will log from non JS hosts envs?
 macro_rules! log {
     ( $( $t:tt )* ) => {
-        web_sys::console::log_1(&format!( $( $t )* ).into());
+        act::utils::print_client::print_host(&format!( $( $t )* ));
     }
 }
 
-#[wasm_bindgen]
+impl FromStr for Methods {
+    //TODO: make this a real err
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Methods, Self::Err> {
+        match input {
+            "OPTIONS" => Ok(Methods::Options),
+            "GET" => Ok(Methods::Get),
+            "HEAD" => Ok(Methods::Head),
+            "PUT" => Ok(Methods::Put),
+            "POST" => Ok(Methods::Post),
+            "DELETE" => Ok(Methods::Delete),
+            _ => Err(()),
+        }
+    }
+}
+
+struct ActUtils;
+
+impl Utils for ActUtils {
+    fn list_tables() -> Result<String, String> {
+        log!("AHHHH IT IS STARTING");
+        //Spawning tokio runtime to run the async call in a sync context
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap_or_else(|err| {
+                log!("{}", err);
+                panic!("FAILED TO GEN RUNTIME")
+            });
+        log!("AFTER RUNTIME INIT");
+        let res = rt.block_on(list_tables());
+        log!("AFTER LIST_TABLES CALL");
+        res
+    }
+}
+
+//Exporting the functions defined in WIT to WASM
+export_utils!(ActUtils);
+
 pub async fn list_tables() -> Result<String, String> {
-    console_error_panic_hook::set_once();
+    // console_error_panic_hook::set_once();
 
     let credentials_provider = static_credential_provider();
 
@@ -64,12 +108,9 @@ pub async fn list_tables() -> Result<String, String> {
 struct WasmTimeSource;
 impl TimeSource for WasmTimeSource {
     fn now(&self) -> std::time::SystemTime {
-        let wasm_now = fluvio_wasm_timer::SystemTime::now()
-            .duration_since(fluvio_wasm_timer::SystemTime::UNIX_EPOCH)
-            .unwrap_or(Duration::new(0, 0));
-        let sys_now = std::time::SystemTime::UNIX_EPOCH
-            .checked_add(wasm_now)
-            .unwrap();
+        let host_now = act::utils::time_client::get_sys_time_unix_millis();
+        let dur = Duration::from_millis(host_now);
+        let sys_now = std::time::SystemTime::UNIX_EPOCH.checked_add(dur).unwrap();
         sys_now
     }
 }
@@ -79,7 +120,7 @@ struct WasmSleep;
 impl AsyncSleep for WasmSleep {
     fn sleep(&self, duration: std::time::Duration) -> Sleep {
         Sleep::new(Box::pin(async move {
-            fluvio_wasm_timer::Delay::new(duration).await.unwrap();
+            tokio::time::sleep(duration).await;
         }))
     }
 }
@@ -133,56 +174,46 @@ impl tower::Service<http::Request<SdkBody>> for Adapter {
             log!("");
         }
 
-        let (send_channel, rec_channel) = tokio::sync::oneshot::channel();
-
         log!("begin request...");
-        wasm_bindgen_futures::spawn_local(async move {
-            let fut = WasmHttpClient::send(parts, body);
-            let _ = send_channel.send(fut.await.unwrap_or_else(|val| {
-                panic!("failure while making request to: {} \n {:#?}", uri, val)
-            }));
-        });
+        let res = WasmHttpClient::send(parts, body).map_err(|e| ConnectorError::user(e));
+        Box::pin(async move { res })
 
-        Box::pin(async move {
-            let response = rec_channel
-                .await
-                .map_err(|e| ConnectorError::user(Box::new(e)))?;
-            log!("response received");
-            Ok(response)
-        })
+        // fut
     }
 }
 
-#[async_trait(?Send)]
 trait MakeRequestWasm {
-    async fn send(
-        parts: http::request::Parts,
-        body: SdkBody,
-    ) -> Result<http::Response<SdkBody>, JsValue>;
+    fn send(parts: http::request::Parts, body: SdkBody) -> Result<http::Response<SdkBody>, Error>;
 }
 
 pub struct WasmHttpClient;
 
-#[async_trait(?Send)]
 impl MakeRequestWasm for WasmHttpClient {
-    async fn send(
-        parts: http::request::Parts,
-        body: SdkBody,
-    ) -> Result<http::Response<SdkBody>, JsValue> {
+    fn send(parts: http::request::Parts, body: SdkBody) -> Result<http::Response<SdkBody>, Error> {
         let body_bytes = body.bytes().unwrap().to_vec();
-        //Reqwest uses wasm-bindgen under the hood to bind calls to fetch
-        //https://github.com/seanmonstar/reqwest/blob/61b1b2b5e6dace3733cdba291801378dd974386a/src/wasm/client.rs#L12
-        let res = reqwest::Client::new()
-            .request(parts.method, parts.uri.to_string())
-            .body(body_bytes)
-            .headers(parts.headers)
-            .send()
-            .await
-            .unwrap_or_else(|err| panic!("failure while making request: {}", err));
 
-        let builder = http::Response::builder().status(res.status());
-        let sdk_body = SdkBody::from(res.bytes().await.unwrap());
-        let sdk_res = builder.body(sdk_body).unwrap();
+        let headers_vec: Vec<(String, String)> = parts
+            .headers
+            .into_iter()
+            .map(|(key, val)| (key.unwrap().to_string(), val.to_str().unwrap().to_string()))
+            .collect();
+
+        let http_opts = &HttpCallOptions {
+            method: Methods::from_str(parts.method.as_str()).unwrap(),
+            uri: parts.uri.to_string(),
+            headers: headers_vec,
+            body: body_bytes,
+        };
+
+        log!(
+            "Calling the host language http_client with {:#?}",
+            http_opts
+        );
+        let res = http_client::make_http_request(http_opts);
+        log!("returned to rust from host http call");
+        let builder = http::Response::builder().status(res.status);
+        let sdk_body = SdkBody::from(res.body.as_bytes());
+        let sdk_res = builder.body(sdk_body)?;
 
         Ok(sdk_res)
     }

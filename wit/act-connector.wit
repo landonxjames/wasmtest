@@ -1,0 +1,55 @@
+package act:utils
+
+interface connector-types {
+  record http-call-options {
+    method: methods,
+    uri: string,
+    headers: headers,
+    body: list<u8>, //The body is just a byte array
+  }
+
+  record http-return-values {
+    status: u16,
+    body: string
+  }
+
+  enum methods {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    OPTIONS,
+    HEAD
+  }
+
+  //Seems like the closest we can get to a map style structure
+  type headers = list<tuple<string, string>>
+
+
+  //TODO: since we are targeting wasm32-unknown-unknown probably need to add
+  //functions for logging and getting the SystemTime as well
+}
+
+interface http-client {
+  use connector-types.{http-call-options, http-return-values}
+  //Just assume everything returns as JSON
+  make-http-request: func(options: http-call-options) -> http-return-values
+}
+
+interface time-client {
+  //This name is clunky, but want to make it obvious to authors that we want the
+  //unix timestamp in milliseconds
+  get-sys-time-unix-millis: func() -> u64
+}
+
+interface print-client {
+  print-host: func(input: string)
+}
+
+world utils {
+  import http-client
+  import time-client
+  import print-client
+  export connector-types
+  export list-tables: func() -> result<string, string>
+}
