@@ -10,7 +10,7 @@ interface connector-types {
 
   record http-return-values {
     status: u16,
-    body: string
+    body: list<u8>
   }
 
   enum methods {
@@ -46,10 +46,20 @@ interface print-client {
   print-host: func(input: string)
 }
 
+interface creds-client {
+  record creds {
+    access-key-id: string,
+    secret-access-key: string,
+    session-token: string,
+  }
+  get-creds: func() -> creds
+}
+
 world utils {
   import http-client
   import time-client
   import print-client
+  import creds-client
   export connector-types
   export list-tables: func() -> result<string, string>
 }

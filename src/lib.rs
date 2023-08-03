@@ -1,9 +1,8 @@
 //WIT imports
 wit_bindgen::generate!("utils");
 use act::utils::connector_types::{HttpCallOptions, Methods};
-use act::utils::http_client;
+use act::utils::{creds_client, http_client, print_client, time_client};
 //Normal crate imports
-use async_trait::async_trait;
 use aws_credential_types::{provider::ProvideCredentials, Credentials};
 use aws_sdk_dynamodb::{config::Region, Client};
 use aws_smithy_async::rt::sleep::{AsyncSleep, Sleep};
@@ -15,8 +14,6 @@ use aws_smithy_http::{
 };
 use std::str::FromStr;
 use std::time::Duration;
-// use tokio::time::Delay;
-// extern crate console_error_panic_hook;
 
 macro_rules! log {
     ( $( $t:tt )* ) => {
@@ -45,7 +42,6 @@ struct ActUtils;
 
 impl Utils for ActUtils {
     fn list_tables() -> Result<String, String> {
-        log!("AHHHH IT IS STARTING");
         //Spawning tokio runtime to run the async call in a sync context
         let rt = tokio::runtime::Builder::new_current_thread()
             .build()
@@ -53,9 +49,7 @@ impl Utils for ActUtils {
                 log!("{}", err);
                 panic!("FAILED TO GEN RUNTIME")
             });
-        log!("AFTER RUNTIME INIT");
         let res = rt.block_on(list_tables());
-        log!("AFTER LIST_TABLES CALL");
         res
     }
 }
@@ -64,8 +58,6 @@ impl Utils for ActUtils {
 export_utils!(ActUtils);
 
 pub async fn list_tables() -> Result<String, String> {
-    // console_error_panic_hook::set_once();
-
     let credentials_provider = static_credential_provider();
 
     let shared_config = aws_config::from_env()
@@ -100,7 +92,6 @@ pub async fn list_tables() -> Result<String, String> {
         acc.push_str("\n");
         acc
     });
-    log!("{output}");
     Ok(output)
 }
 
@@ -126,10 +117,14 @@ impl AsyncSleep for WasmSleep {
 }
 
 //TODO: figure out how to pass the Lambda env variable credentials to the WASM code
+//TODO: expose a WIT imported function that provides the credentials
 fn static_credential_provider() -> impl ProvideCredentials {
-    // let credentials = serde_wasm_bindgen::from_value::<AwsCredentials>(retrieve_credentials())
-    //     .expect("invalid credentials");
-    Credentials::from_keys("fake", "fake", Some("fake".to_string()))
+    let creds = creds_client::get_creds();
+    Credentials::from_keys(
+        creds.access_key_id,
+        creds.secret_access_key,
+        Some(creds.session_token),
+    )
 }
 
 //Code below here is all dedicated to sending the call across the sandbox barrier
@@ -177,8 +172,6 @@ impl tower::Service<http::Request<SdkBody>> for Adapter {
         log!("begin request...");
         let res = WasmHttpClient::send(parts, body).map_err(|e| ConnectorError::user(e));
         Box::pin(async move { res })
-
-        // fut
     }
 }
 
@@ -212,7 +205,7 @@ impl MakeRequestWasm for WasmHttpClient {
         let res = http_client::make_http_request(http_opts);
         log!("returned to rust from host http call");
         let builder = http::Response::builder().status(res.status);
-        let sdk_body = SdkBody::from(res.body.as_bytes());
+        let sdk_body = SdkBody::from(res.body);
         let sdk_res = builder.body(sdk_body)?;
 
         Ok(sdk_res)

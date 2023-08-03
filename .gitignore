@@ -1,3 +1,7 @@
 /target
 /Cargo.lock
 .DS_Store
+/jsbind/act-utils.core.wasm
+/package-lock.json
+/act-utils.wasm
+/node_modules

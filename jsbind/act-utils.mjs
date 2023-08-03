@@ -1,3 +1,4 @@
+import { getCreds } from './act-utils/creds-client.mjs';
 import { makeHttpRequest } from './act-utils/http-client.mjs';
 import { printHost } from './act-utils/print-client.mjs';
 import { getSysTimeUnixMillis } from './act-utils/time-client.mjs';
@@ -133,13 +134,33 @@ function lowering1(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   });
   const {status: v6_0, body: v6_1 } = ret;
   dataView(memory0).setInt16(arg7 + 0, toUint16(v6_0), true);
-  const ptr7 = utf8Encode(v6_1, realloc0, memory0);
-  const len7 = utf8EncodedLen;
+  const val7 = v6_1;
+  const len7 = val7.byteLength;
+  const ptr7 = realloc0(0, 0, 1, len7 * 1);
+  const src7 = new Uint8Array(val7.buffer || val7, val7.byteOffset, len7 * 1);
+  (new Uint8Array(memory0.buffer, ptr7, len7 * 1)).set(src7);
   dataView(memory0).setInt32(arg7 + 8, len7, true);
   dataView(memory0).setInt32(arg7 + 4, ptr7, true);
 }
 
-function lowering2(arg0, arg1) {
+function lowering2(arg0) {
+  const ret = getCreds();
+  const {accessKeyId: v0_0, secretAccessKey: v0_1, sessionToken: v0_2 } = ret;
+  const ptr1 = utf8Encode(v0_0, realloc0, memory0);
+  const len1 = utf8EncodedLen;
+  dataView(memory0).setInt32(arg0 + 4, len1, true);
+  dataView(memory0).setInt32(arg0 + 0, ptr1, true);
+  const ptr2 = utf8Encode(v0_1, realloc0, memory0);
+  const len2 = utf8EncodedLen;
+  dataView(memory0).setInt32(arg0 + 12, len2, true);
+  dataView(memory0).setInt32(arg0 + 8, ptr2, true);
+  const ptr3 = utf8Encode(v0_2, realloc0, memory0);
+  const len3 = utf8EncodedLen;
+  dataView(memory0).setInt32(arg0 + 20, len3, true);
+  dataView(memory0).setInt32(arg0 + 16, ptr3, true);
+}
+
+function lowering3(arg0, arg1) {
   const ptr0 = arg0;
   const len0 = arg1;
   const result0 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr0, len0));
@@ -184,17 +205,20 @@ function listTables() {
 }
 
 const $init = (async() => {
-  const module0 = fetchCompile(new URL('./my-component-nowasi.core.wasm', import.meta.url));
-  const module1 = base64Compile('AGFzbQEAAAABEQJgCH9/f39/f39/AGACf38AAwMCAAEEBQFwAQICBxQDATAAAAExAAEIJGltcG9ydHMBAAolAhcAIAAgASACIAMgBCAFIAYgB0EAEQAACwsAIAAgAUEBEQEACwAuCXByb2R1Y2VycwEMcHJvY2Vzc2VkLWJ5AQ13aXQtY29tcG9uZW50BjAuMTMuMQB7BG5hbWUAExJ3aXQtY29tcG9uZW50OnNoaW0BXwIAMGluZGlyZWN0LWFjdDp1dGlscy9odHRwLWNsaWVudC1tYWtlLWh0dHAtcmVxdWVzdAEqaW5kaXJlY3QtYWN0OnV0aWxzL3ByaW50LWNsaWVudC1wcmludC1ob3N0');
-  const module2 = base64Compile('AGFzbQEAAAABEQJgCH9/f39/f39/AGACf38AAhoDAAEwAAAAATEAAQAIJGltcG9ydHMBcAECAgkIAQBBAAsCAAEALglwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQENd2l0LWNvbXBvbmVudAYwLjEzLjEAHARuYW1lABUUd2l0LWNvbXBvbmVudDpmaXh1cHM');
+  const module0 = fetchCompile(new URL('./act-utils.core.wasm', import.meta.url));
+  const module1 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGABfwBgAn9/AAMEAwABAgQFAXABAwMHGAQBMAAAATEAAQEyAAIIJGltcG9ydHMBAAovAxcAIAAgASACIAMgBCAFIAYgB0EAEQAACwkAIABBAREBAAsLACAAIAFBAhECAAsALglwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQENd2l0LWNvbXBvbmVudAYwLjEzLjEApwEEbmFtZQATEndpdC1jb21wb25lbnQ6c2hpbQGKAQMAMGluZGlyZWN0LWFjdDp1dGlscy9odHRwLWNsaWVudC1tYWtlLWh0dHAtcmVxdWVzdAEpaW5kaXJlY3QtYWN0OnV0aWxzL2NyZWRzLWNsaWVudC1nZXQtY3JlZHMCKmluZGlyZWN0LWFjdDp1dGlscy9wcmludC1jbGllbnQtcHJpbnQtaG9zdA');
+  const module2 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGABfwBgAn9/AAIfBAABMAAAAAExAAEAATIAAgAIJGltcG9ydHMBcAEDAwkJAQBBAAsDAAECAC4JcHJvZHVjZXJzAQxwcm9jZXNzZWQtYnkBDXdpdC1jb21wb25lbnQGMC4xMy4xABwEbmFtZQAVFHdpdC1jb21wb25lbnQ6Zml4dXBz');
   Promise.all([module0, module1, module2]).catch(() => {});
   ({ exports: exports0 } = await instantiateCore(await module1));
   ({ exports: exports1 } = await instantiateCore(await module0, {
+    'act:utils/creds-client': {
+      'get-creds': exports0['1'],
+    },
     'act:utils/http-client': {
       'make-http-request': exports0['0'],
     },
     'act:utils/print-client': {
-      'print-host': exports0['1'],
+      'print-host': exports0['2'],
     },
     'act:utils/time-client': {
       'get-sys-time-unix-millis': lowering0,
@@ -207,6 +231,7 @@ const $init = (async() => {
       $imports: exports0.$imports,
       '0': lowering1,
       '1': lowering2,
+      '2': lowering3,
     },
   }));
   postReturn0 = exports1['cabi_post_list-tables'];

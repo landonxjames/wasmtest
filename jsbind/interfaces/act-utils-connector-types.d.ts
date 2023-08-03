@@ -25,5 +25,5 @@ export interface HttpCallOptions {
 }
 export interface HttpReturnValues {
   status: number,
-  body: string,
+  body: Uint8Array,
 }

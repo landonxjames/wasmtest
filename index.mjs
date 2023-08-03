@@ -1,4 +1,4 @@
-import * as wasmMod from "./jsbind/my-component-nowasi.mjs";
+import * as wasmMod from "./jsbind/act-utils.mjs";
 
 Error.stackTraceLimit = Infinity;
 
