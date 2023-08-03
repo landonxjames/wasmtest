@@ -4,51 +4,34 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-aws-config= { path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-config", default-features = false }
-aws-smithy-async= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-smithy-async" }
-aws-smithy-client= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-smithy-client", default-features = false }
-aws-smithy-http= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-smithy-http", features = ["event-stream"] }
-aws-credential-types= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-credential-types", features = ["hardcoded-credentials"] }
-aws-sdk-dynamodb = { path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/dynamodb", default-features = false }
+#Using published SDK
+aws-config= { version = "0.56.0", default-features = false }
+aws-smithy-async= { version = "0.56.0" }
+aws-smithy-client= { version = "0.56.0", default-features = false }
+aws-smithy-http= { version = "0.56.0", features = ["event-stream"] }
+aws-credential-types= { version = "0.56.0", features = ["hardcoded-credentials"] }
+aws-sdk-dynamodb = { version = "0.29.0", default-features = false }
 
-# # aws-config= { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
-# # aws-smithy-async= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next" }
-# # aws-smithy-client= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
-# # aws-smithy-http= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["event-stream"] }
-# # aws-credential-types= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["hardcoded-credentials"] }
-# # aws-sdk-dynamodb = { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+# Uncomment to use local smithy-rs built SDK
+# aws-config= { path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-config", default-features = false }
+# aws-smithy-async= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-smithy-async" }
+# aws-smithy-client= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-smithy-client", default-features = false }
+# aws-smithy-http= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-smithy-http", features = ["event-stream"] }
+# aws-credential-types= {  path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/aws-credential-types", features = ["hardcoded-credentials"] }
+# aws-sdk-dynamodb = { path = "/Users/lnj/workplace/smithy-rs/aws/sdk/build/aws-sdk/sdk/dynamodb", default-features = false }
 
-async-trait = "0.1.71"
-# js-sys = "0.3.64"
-# wasm-bindgen = "0.2.86"
-# wasm-bindgen-futures = "0.4.37"
-# serde-wasm-bindgen = "0.5.0"
+# Uncomment to use next branch of aws-sdk-rust Github
+# aws-config= { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+# aws-smithy-async= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next" }
+# aws-smithy-client= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+# aws-smithy-http= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["event-stream"] }
+# aws-credential-types= {  git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", features = ["hardcoded-credentials"] }
+# aws-sdk-dynamodb = { git = "https://github.com/awslabs/aws-sdk-rust.git", branch = "next", default-features = false }
+
 tower = "0.4.13"
 http = "0.2.9"
-console_error_panic_hook = "0.1.7"
-reqwest = { version = "0.11", features = ["json"] }
-
-
-
-
-
-
-
 wit-bindgen = { version = "0.9.0" }
-# pulldown-cmark = { version = "0.9.3", default-features = false }
-serde_json = "1.0.104"
-[dependencies.serde]
-version = "1.0.171"
-features = ["derive"]
-
-[dependencies.web-sys]
-version = "0.3.60"
-features = ["console", "Headers", "Request", "RequestInit", "RequestMode", "Response", "Window"]
-
-[dependencies.tokio]
-version = "1.29.1"
-# features = ["full"]
-features = ["macros", "rt"]
+tokio = {version = "1.29.1", features = ["macros", "rt"]}
 
 [lib]
 crate-type = ["cdylib"]

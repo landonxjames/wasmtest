@@ -143,7 +143,14 @@ function lowering1(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   dataView(memory0).setInt32(arg7 + 4, ptr7, true);
 }
 
-function lowering2(arg0) {
+function lowering2(arg0, arg1) {
+  const ptr0 = arg0;
+  const len0 = arg1;
+  const result0 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr0, len0));
+  printHost(result0);
+}
+
+function lowering3(arg0) {
   const ret = getCreds();
   const {accessKeyId: v0_0, secretAccessKey: v0_1, sessionToken: v0_2 } = ret;
   const ptr1 = utf8Encode(v0_0, realloc0, memory0);
@@ -158,13 +165,6 @@ function lowering2(arg0) {
   const len3 = utf8EncodedLen;
   dataView(memory0).setInt32(arg0 + 20, len3, true);
   dataView(memory0).setInt32(arg0 + 16, ptr3, true);
-}
-
-function lowering3(arg0, arg1) {
-  const ptr0 = arg0;
-  const len0 = arg1;
-  const result0 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr0, len0));
-  printHost(result0);
 }
 let exports2;
 let postReturn0;
@@ -206,19 +206,19 @@ function listTables() {
 
 const $init = (async() => {
   const module0 = fetchCompile(new URL('./act-utils.core.wasm', import.meta.url));
-  const module1 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGABfwBgAn9/AAMEAwABAgQFAXABAwMHGAQBMAAAATEAAQEyAAIIJGltcG9ydHMBAAovAxcAIAAgASACIAMgBCAFIAYgB0EAEQAACwkAIABBAREBAAsLACAAIAFBAhECAAsALglwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQENd2l0LWNvbXBvbmVudAYwLjEzLjEApwEEbmFtZQATEndpdC1jb21wb25lbnQ6c2hpbQGKAQMAMGluZGlyZWN0LWFjdDp1dGlscy9odHRwLWNsaWVudC1tYWtlLWh0dHAtcmVxdWVzdAEpaW5kaXJlY3QtYWN0OnV0aWxzL2NyZWRzLWNsaWVudC1nZXQtY3JlZHMCKmluZGlyZWN0LWFjdDp1dGlscy9wcmludC1jbGllbnQtcHJpbnQtaG9zdA');
-  const module2 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGABfwBgAn9/AAIfBAABMAAAAAExAAEAATIAAgAIJGltcG9ydHMBcAEDAwkJAQBBAAsDAAECAC4JcHJvZHVjZXJzAQxwcm9jZXNzZWQtYnkBDXdpdC1jb21wb25lbnQGMC4xMy4xABwEbmFtZQAVFHdpdC1jb21wb25lbnQ6Zml4dXBz');
+  const module1 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGACf38AYAF/AAMEAwABAgQFAXABAwMHGAQBMAAAATEAAQEyAAIIJGltcG9ydHMBAAovAxcAIAAgASACIAMgBCAFIAYgB0EAEQAACwsAIAAgAUEBEQEACwkAIABBAhECAAsALglwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQENd2l0LWNvbXBvbmVudAYwLjEzLjEApwEEbmFtZQATEndpdC1jb21wb25lbnQ6c2hpbQGKAQMAMGluZGlyZWN0LWFjdDp1dGlscy9odHRwLWNsaWVudC1tYWtlLWh0dHAtcmVxdWVzdAEqaW5kaXJlY3QtYWN0OnV0aWxzL3ByaW50LWNsaWVudC1wcmludC1ob3N0AilpbmRpcmVjdC1hY3Q6dXRpbHMvY3JlZHMtY2xpZW50LWdldC1jcmVkcw');
+  const module2 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGACf38AYAF/AAIfBAABMAAAAAExAAEAATIAAgAIJGltcG9ydHMBcAEDAwkJAQBBAAsDAAECAC4JcHJvZHVjZXJzAQxwcm9jZXNzZWQtYnkBDXdpdC1jb21wb25lbnQGMC4xMy4xABwEbmFtZQAVFHdpdC1jb21wb25lbnQ6Zml4dXBz');
   Promise.all([module0, module1, module2]).catch(() => {});
   ({ exports: exports0 } = await instantiateCore(await module1));
   ({ exports: exports1 } = await instantiateCore(await module0, {
     'act:utils/creds-client': {
-      'get-creds': exports0['1'],
+      'get-creds': exports0['2'],
     },
     'act:utils/http-client': {
       'make-http-request': exports0['0'],
     },
     'act:utils/print-client': {
-      'print-host': exports0['2'],
+      'print-host': exports0['1'],
     },
     'act:utils/time-client': {
       'get-sys-time-unix-millis': lowering0,
