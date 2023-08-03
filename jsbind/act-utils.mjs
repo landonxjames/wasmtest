@@ -76,7 +76,31 @@ let exports1;
 let memory0;
 let realloc0;
 
-function lowering1(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+function lowering1(arg0) {
+  const ret = getCreds();
+  const {accessKeyId: v0_0, secretAccessKey: v0_1, sessionToken: v0_2 } = ret;
+  const ptr1 = utf8Encode(v0_0, realloc0, memory0);
+  const len1 = utf8EncodedLen;
+  dataView(memory0).setInt32(arg0 + 4, len1, true);
+  dataView(memory0).setInt32(arg0 + 0, ptr1, true);
+  const ptr2 = utf8Encode(v0_1, realloc0, memory0);
+  const len2 = utf8EncodedLen;
+  dataView(memory0).setInt32(arg0 + 12, len2, true);
+  dataView(memory0).setInt32(arg0 + 8, ptr2, true);
+  const ptr3 = utf8Encode(v0_2, realloc0, memory0);
+  const len3 = utf8EncodedLen;
+  dataView(memory0).setInt32(arg0 + 20, len3, true);
+  dataView(memory0).setInt32(arg0 + 16, ptr3, true);
+}
+
+function lowering2(arg0, arg1) {
+  const ptr0 = arg0;
+  const len0 = arg1;
+  const result0 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr0, len0));
+  printHost(result0);
+}
+
+function lowering3(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   let enum0;
   switch (arg0) {
     case 0: {
@@ -142,30 +166,6 @@ function lowering1(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   dataView(memory0).setInt32(arg7 + 8, len7, true);
   dataView(memory0).setInt32(arg7 + 4, ptr7, true);
 }
-
-function lowering2(arg0, arg1) {
-  const ptr0 = arg0;
-  const len0 = arg1;
-  const result0 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr0, len0));
-  printHost(result0);
-}
-
-function lowering3(arg0) {
-  const ret = getCreds();
-  const {accessKeyId: v0_0, secretAccessKey: v0_1, sessionToken: v0_2 } = ret;
-  const ptr1 = utf8Encode(v0_0, realloc0, memory0);
-  const len1 = utf8EncodedLen;
-  dataView(memory0).setInt32(arg0 + 4, len1, true);
-  dataView(memory0).setInt32(arg0 + 0, ptr1, true);
-  const ptr2 = utf8Encode(v0_1, realloc0, memory0);
-  const len2 = utf8EncodedLen;
-  dataView(memory0).setInt32(arg0 + 12, len2, true);
-  dataView(memory0).setInt32(arg0 + 8, ptr2, true);
-  const ptr3 = utf8Encode(v0_2, realloc0, memory0);
-  const len3 = utf8EncodedLen;
-  dataView(memory0).setInt32(arg0 + 20, len3, true);
-  dataView(memory0).setInt32(arg0 + 16, ptr3, true);
-}
 let exports2;
 let postReturn0;
 
@@ -206,16 +206,16 @@ function listTables() {
 
 const $init = (async() => {
   const module0 = fetchCompile(new URL('./act-utils.core.wasm', import.meta.url));
-  const module1 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGACf38AYAF/AAMEAwABAgQFAXABAwMHGAQBMAAAATEAAQEyAAIIJGltcG9ydHMBAAovAxcAIAAgASACIAMgBCAFIAYgB0EAEQAACwsAIAAgAUEBEQEACwkAIABBAhECAAsALglwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQENd2l0LWNvbXBvbmVudAYwLjEzLjEApwEEbmFtZQATEndpdC1jb21wb25lbnQ6c2hpbQGKAQMAMGluZGlyZWN0LWFjdDp1dGlscy9odHRwLWNsaWVudC1tYWtlLWh0dHAtcmVxdWVzdAEqaW5kaXJlY3QtYWN0OnV0aWxzL3ByaW50LWNsaWVudC1wcmludC1ob3N0AilpbmRpcmVjdC1hY3Q6dXRpbHMvY3JlZHMtY2xpZW50LWdldC1jcmVkcw');
-  const module2 = base64Compile('AGFzbQEAAAABFQNgCH9/f39/f39/AGACf38AYAF/AAIfBAABMAAAAAExAAEAATIAAgAIJGltcG9ydHMBcAEDAwkJAQBBAAsDAAECAC4JcHJvZHVjZXJzAQxwcm9jZXNzZWQtYnkBDXdpdC1jb21wb25lbnQGMC4xMy4xABwEbmFtZQAVFHdpdC1jb21wb25lbnQ6Zml4dXBz');
+  const module1 = base64Compile('AGFzbQEAAAABFQNgAX8AYAJ/fwBgCH9/f39/f39/AAMEAwABAgQFAXABAwMHGAQBMAAAATEAAQEyAAIIJGltcG9ydHMBAAovAwkAIABBABEAAAsLACAAIAFBAREBAAsXACAAIAEgAiADIAQgBSAGIAdBAhECAAsALglwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQENd2l0LWNvbXBvbmVudAYwLjEzLjEApwEEbmFtZQATEndpdC1jb21wb25lbnQ6c2hpbQGKAQMAKWluZGlyZWN0LWFjdDp1dGlscy9jcmVkcy1jbGllbnQtZ2V0LWNyZWRzASppbmRpcmVjdC1hY3Q6dXRpbHMvcHJpbnQtY2xpZW50LXByaW50LWhvc3QCMGluZGlyZWN0LWFjdDp1dGlscy9odHRwLWNsaWVudC1tYWtlLWh0dHAtcmVxdWVzdA');
+  const module2 = base64Compile('AGFzbQEAAAABFQNgAX8AYAJ/fwBgCH9/f39/f39/AAIfBAABMAAAAAExAAEAATIAAgAIJGltcG9ydHMBcAEDAwkJAQBBAAsDAAECAC4JcHJvZHVjZXJzAQxwcm9jZXNzZWQtYnkBDXdpdC1jb21wb25lbnQGMC4xMy4xABwEbmFtZQAVFHdpdC1jb21wb25lbnQ6Zml4dXBz');
   Promise.all([module0, module1, module2]).catch(() => {});
   ({ exports: exports0 } = await instantiateCore(await module1));
   ({ exports: exports1 } = await instantiateCore(await module0, {
     'act:utils/creds-client': {
-      'get-creds': exports0['2'],
+      'get-creds': exports0['0'],
     },
     'act:utils/http-client': {
-      'make-http-request': exports0['0'],
+      'make-http-request': exports0['2'],
     },
     'act:utils/print-client': {
       'print-host': exports0['1'],
