@@ -204,6 +204,8 @@ impl MakeRequestWasm for WasmHttpClient {
         );
         let res = http_client::make_http_request(http_opts);
         log!("returned to rust from host http call");
+        let res_string = std::str::from_utf8(&res.body);
+        log!("return as string: {res_string:#?}");
         let builder = http::Response::builder().status(res.status);
         let sdk_body = SdkBody::from(res.body);
         let sdk_res = builder.body(sdk_body)?;

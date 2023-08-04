@@ -5,3 +5,5 @@
 /package-lock.json
 /act-utils.wasm
 /node_modules
+.vscode/
+/pybind/*.wasm
