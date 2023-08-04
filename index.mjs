@@ -4,4 +4,4 @@ Error.stackTraceLimit = Infinity;
 
 const out = wasmMod.listTables();
 
-console.log(out);
+console.log("Output in Node: \n", out);

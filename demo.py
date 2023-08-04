@@ -15,6 +15,7 @@ import pybind
 
 
 class CredsClient(creds_client.CredsClient):
+    # TODO: use actual lang SDK for credential resolution
     def get_creds(self) -> creds_client.Creds:
         access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
         secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -35,7 +36,6 @@ class HostHTTPClient(http_client.HttpClient):
             headers_dict[k] = v
 
         print(f"In python method making request to: {options.uri}")
-        print(f"In python method using HTTP method: {options.method}")
         response = requests.request(
             options.method.name, options.uri, data=options.body, headers=headers_dict
         )
@@ -69,8 +69,8 @@ def main():
         connector_types=ConnectorTypes(),
     )
     root = pybind.Root(store, host_imports)
-    print("Testing rust based AWS SDK:\n")
     res = root.list_tables(store)
+    print("Output in Python: \n", res.value)
 
 
 if __name__ == "__main__":
