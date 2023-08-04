@@ -6,4 +6,4 @@
 /act-utils.wasm
 /node_modules
 .vscode/
-/pybind/*.wasm
+/pybind/root.core*
