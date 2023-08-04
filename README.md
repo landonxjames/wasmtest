@@ -1,6 +1,6 @@
 This repo contains an example of running the AWS Rust SDK compiled to WASM in two
 language runtimes, Node and Python. It achieves this by defining some utility
-functions was WebAssembly components, which are implemented in the host language
+functions was [WebAssembly components](./wit/act-utils.wit), which are implemented in the host language
 and used to provide system integration for the WASM sandbox. Currently the required
 utils are an `http-client` to perform the network calls, a `time-client` to provide
 the system time, a `print-client` to send output to `sdtdout`, and a `creds-client`
