@@ -24,15 +24,10 @@ interface connector-types {
 
   //Seems like the closest we can get to a map style structure
   type headers = list<tuple<string, string>>
-
-
-  //TODO: since we are targeting wasm32-unknown-unknown probably need to add
-  //functions for logging and getting the SystemTime as well
 }
 
 interface http-client {
   use connector-types.{http-call-options, http-return-values}
-  //Just assume everything returns as JSON
   make-http-request: func(options: http-call-options) -> http-return-values
 }
 
