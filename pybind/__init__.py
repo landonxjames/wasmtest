@@ -1,5 +1,4 @@
-from .exports import connector_types
-from .imports import RootImports
+from .imports import RootImports, http_client
 from .intrinsics import _clamp, _decode_utf8, _encode_utf8, _list_canon_lift, _list_canon_lower, _load, _store
 from .types import Err, Ok, Result
 import ctypes
@@ -55,7 +54,7 @@ class Root:
             ptr14 = arg5
             len15 = arg6
             list16 = cast(bytes, _list_canon_lift(ptr14, len15, 1, ctypes.c_uint8, self._core_memory0, caller))
-            ret = import_object.http_client.make_http_request(connector_types.HttpCallOptions(connector_types.Methods(arg0), list, result, list16))
+            ret = import_object.http_client.make_http_request(http_client.HttpCallOptions(http_client.Methods(arg0), list, result, list16))
             record = ret
             field = record.status
             field17 = record.body
@@ -126,5 +125,3 @@ class Root:
             raise TypeError("invalid variant discriminant for expected")
         self._post_return0(caller, ret)
         return expected
-    def connector_types(self) -> connector_types.ConnectorTypes:
-        return connector_types.ConnectorTypes(self)

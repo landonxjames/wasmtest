@@ -1,7 +1,10 @@
 //WIT imports
 wit_bindgen::generate!("utils");
-use act::utils::connector_types::{HttpCallOptions, Methods};
-use act::utils::{creds_client, http_client, print_client, time_client};
+use act::utils::{
+    creds_client, http_client,
+    http_client::{HttpCallOptions, Methods},
+    print_client, time_client,
+};
 //Normal crate imports
 use aws_credential_types::{provider::ProvideCredentials, Credentials};
 use aws_sdk_dynamodb::{config::Region, Client};
@@ -17,7 +20,7 @@ use std::time::Duration;
 
 macro_rules! log {
     ( $( $t:tt )* ) => {
-        act::utils::print_client::print_host(&format!( $( $t )* ));
+        print_client::print_host(&format!( $( $t )* ));
     }
 }
 
@@ -99,7 +102,7 @@ pub async fn list_tables() -> Result<String, String> {
 struct WasmTimeSource;
 impl TimeSource for WasmTimeSource {
     fn now(&self) -> std::time::SystemTime {
-        let host_now = act::utils::time_client::get_sys_time_unix_millis();
+        let host_now = time_client::get_sys_time_unix_millis();
         let dur = Duration::from_millis(host_now);
         let sys_now = std::time::SystemTime::UNIX_EPOCH.checked_add(dur).unwrap();
         sys_now

@@ -5,7 +5,6 @@ from pybind.imports import (
     http_client,
     time_client,
     print_client,
-    connector_types,
 )
 
 # from pybind.exports import connector_types
@@ -53,10 +52,6 @@ class TimeClient(time_client.TimeClient):
         return now_ms
 
 
-class ConnectorTypes(connector_types.ConnectorTypes):
-    pass
-
-
 def main():
     config = Config()
     engine = Engine(config)
@@ -66,7 +61,6 @@ def main():
         print_client=PrintClient(),
         time_client=TimeClient(),
         creds_client=CredsClient(),
-        connector_types=ConnectorTypes(),
     )
     root = pybind.Root(store, host_imports)
     res = root.list_tables(store)

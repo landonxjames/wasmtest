@@ -1,7 +1,7 @@
 package act:utils
 
-interface connector-types {
-  record http-call-options {
+interface http-client {
+record http-call-options {
     method: methods,
     uri: string,
     headers: headers,
@@ -24,10 +24,7 @@ interface connector-types {
 
   //Seems like the closest we can get to a map style structure
   type headers = list<tuple<string, string>>
-}
 
-interface http-client {
-  use connector-types.{http-call-options, http-return-values}
   make-http-request: func(options: http-call-options) -> http-return-values
 }
 
@@ -55,6 +52,5 @@ world utils {
   import time-client
   import print-client
   import creds-client
-  export connector-types
   export list-tables: func() -> result<string, string>
 }
