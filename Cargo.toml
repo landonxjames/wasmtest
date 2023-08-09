@@ -32,6 +32,8 @@ tower = "0.4.13"
 http = "0.2.9"
 wit-bindgen = { version = "0.9.0" }
 tokio = {version = "1.29.1", features = ["macros", "rt"]}
+serde_json = "1.0.104"
+serde = {version = "1.0.183", features = ["derive"]}
 
 [lib]
 crate-type = ["cdylib"]

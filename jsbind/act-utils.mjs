@@ -168,6 +168,113 @@ function lowering3(arg0) {
 }
 let exports2;
 let postReturn0;
+let postReturn1;
+
+function parse(arg0) {
+  const ptr0 = utf8Encode(arg0, realloc0, memory0);
+  const len0 = utf8EncodedLen;
+  const ret = exports1['act:utils/alarm-connector-def#parse'](ptr0, len0);
+  let variant16;
+  switch (dataView(memory0).getUint8(ret + 0, true)) {
+    case 0: {
+      const ptr1 = dataView(memory0).getInt32(ret + 4, true);
+      const len1 = dataView(memory0).getInt32(ret + 8, true);
+      const result1 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr1, len1));
+      const ptr2 = dataView(memory0).getInt32(ret + 12, true);
+      const len2 = dataView(memory0).getInt32(ret + 16, true);
+      const result2 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr2, len2));
+      const ptr3 = dataView(memory0).getInt32(ret + 20, true);
+      const len3 = dataView(memory0).getInt32(ret + 24, true);
+      const result3 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr3, len3));
+      const ptr4 = dataView(memory0).getInt32(ret + 28, true);
+      const len4 = dataView(memory0).getInt32(ret + 32, true);
+      const result4 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr4, len4));
+      const ptr5 = dataView(memory0).getInt32(ret + 36, true);
+      const len5 = dataView(memory0).getInt32(ret + 40, true);
+      const result5 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr5, len5));
+      const ptr6 = dataView(memory0).getInt32(ret + 44, true);
+      const len6 = dataView(memory0).getInt32(ret + 48, true);
+      const result6 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr6, len6));
+      const len9 = dataView(memory0).getInt32(ret + 56, true);
+      const base9 = dataView(memory0).getInt32(ret + 52, true);
+      const result9 = [];
+      for (let i = 0; i < len9; i++) {
+        const base = base9 + i * 16;
+        const ptr7 = dataView(memory0).getInt32(base + 0, true);
+        const len7 = dataView(memory0).getInt32(base + 4, true);
+        const result7 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr7, len7));
+        const ptr8 = dataView(memory0).getInt32(base + 8, true);
+        const len8 = dataView(memory0).getInt32(base + 12, true);
+        const result8 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr8, len8));
+        result9.push({
+          language: result7,
+          latestDescription: result8,
+        });
+      }
+      const len14 = dataView(memory0).getInt32(ret + 64, true);
+      const base14 = dataView(memory0).getInt32(ret + 60, true);
+      const result14 = [];
+      for (let i = 0; i < len14; i++) {
+        const base = base14 + i * 16;
+        const ptr10 = dataView(memory0).getInt32(base + 0, true);
+        const len10 = dataView(memory0).getInt32(base + 4, true);
+        const result10 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr10, len10));
+        const len13 = dataView(memory0).getInt32(base + 12, true);
+        const base13 = dataView(memory0).getInt32(base + 8, true);
+        const result13 = [];
+        for (let i = 0; i < len13; i++) {
+          const base = base13 + i * 16;
+          const ptr11 = dataView(memory0).getInt32(base + 0, true);
+          const len11 = dataView(memory0).getInt32(base + 4, true);
+          const result11 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr11, len11));
+          const ptr12 = dataView(memory0).getInt32(base + 8, true);
+          const len12 = dataView(memory0).getInt32(base + 12, true);
+          const result12 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr12, len12));
+          result13.push({
+            key: result11,
+            value: result12,
+          });
+        }
+        result14.push({
+          entityValue: result10,
+          tags: result13,
+        });
+      }
+      variant16= {
+        tag: 'ok',
+        val: {
+          eventArn: result1,
+          service: result2,
+          eventTypeCode: result3,
+          eventTypeCategory: result4,
+          startTime: result5,
+          endTime: result6,
+          eventDescription: result9,
+          affectedEntities: result14,
+        }
+      };
+      break;
+    }
+    case 1: {
+      const ptr15 = dataView(memory0).getInt32(ret + 4, true);
+      const len15 = dataView(memory0).getInt32(ret + 8, true);
+      const result15 = utf8Decoder.decode(new Uint8Array(memory0.buffer, ptr15, len15));
+      variant16= {
+        tag: 'err',
+        val: result15
+      };
+      break;
+    }
+    default: {
+      throw new TypeError('invalid variant discriminant for expected');
+    }
+  }
+  postReturn0(ret);
+  if (variant16.tag === 'err') {
+    throw new ComponentError(variant16.val);
+  }
+  return variant16.val;
+}
 
 function listTables() {
   const ret = exports1['list-tables']();
@@ -197,7 +304,7 @@ function listTables() {
       throw new TypeError('invalid variant discriminant for expected');
     }
   }
-  postReturn0(ret);
+  postReturn1(ret);
   if (variant2.tag === 'err') {
     throw new ComponentError(variant2.val);
   }
@@ -234,9 +341,14 @@ const $init = (async() => {
       '2': lowering3,
     },
   }));
-  postReturn0 = exports1['cabi_post_list-tables'];
+  postReturn0 = exports1['cabi_post_act:utils/alarm-connector-def#parse'];
+  postReturn1 = exports1['cabi_post_list-tables'];
 })();
 
 await $init;
+const alarmConnectorDef = {
+  parse: parse,
+  
+};
 
-export { listTables }
+export { alarmConnectorDef, alarmConnectorDef as 'act:utils/alarm-connector-def', listTables }

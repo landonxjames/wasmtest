@@ -53,4 +53,45 @@ world utils {
   import print-client
   import creds-client
   export list-tables: func() -> result<string, string>
+  export alarm-connector-def
 }
+
+
+interface alarm-connector-def {
+
+    record alarm-event {
+        event-arn: string,
+        service: string,
+        event-type-code: string,
+        event-type-category: string,
+        start-time: string,
+        end-time: string,
+        event-description: event-desc-list,
+        affected-entities: entity-list,
+    }
+    
+    type event-desc-list = list<event-description>
+    
+    record event-description {
+        language: string,
+        latest-description: string,
+    }
+    
+    type entity-list = list<entity>
+    
+    //This Entity is not to be confused with the ACT concept of 
+    //Entity = Component | Connector, thats just an unfortunate overlap of
+    //concept names
+    record entity{
+        entity-value: string,
+        tags: list<tag>,
+    }
+    
+    record tag{
+        key: string,
+        value: string,
+    }
+
+    parse: func(input: string) -> result<alarm-event, string>
+}
+

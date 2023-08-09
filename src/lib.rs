@@ -1,5 +1,8 @@
 //WIT imports
 wit_bindgen::generate!("utils");
+use crate::exports::act::utils::alarm_connector_def::{
+    AlarmConnectorDef, AlarmEvent, Entity, EntityList, EventDescList, EventDescription, Tag,
+};
 use act::utils::{
     creds_client, http_client,
     http_client::{HttpCallOptions, Methods},
@@ -15,6 +18,7 @@ use aws_smithy_http::{
     body::{Error, SdkBody},
     result::ConnectorError,
 };
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::time::Duration;
 
@@ -40,9 +44,87 @@ impl FromStr for Methods {
         }
     }
 }
+#[derive(Deserialize)]
+pub struct AlarmEventHelper {
+    pub event_arn: String,
+    pub service: String,
+    pub event_type_code: String,
+    pub event_type_category: String,
+    pub start_time: String,
+    pub end_time: String,
+    pub event_description: EventDescListHelper,
+    pub affected_entities: EntityListHelper,
+}
+
+pub type EventDescListHelper = Vec<EventDescriptionHelper>;
+#[derive(Deserialize)]
+pub struct EventDescriptionHelper {
+    pub language: String,
+    pub latest_description: String,
+}
+pub type EntityListHelper = Vec<EntityHelper>;
+#[derive(Deserialize)]
+pub struct EntityHelper {
+    pub entity_value: String,
+    pub tags: Vec<TagHelper>,
+}
+#[derive(Deserialize)]
+pub struct TagHelper {
+    pub key: String,
+    pub value: String,
+}
+
+impl From<AlarmEventHelper> for AlarmEvent {
+    fn from(item: AlarmEventHelper) -> Self {
+        AlarmEvent {
+            event_arn: item.event_arn,
+            service: item.service,
+            event_type_code: item.event_type_code,
+            event_type_category: item.event_type_category,
+            start_time: item.start_time,
+            end_time: item.end_time,
+            event_description: item
+                .event_description
+                .into_iter()
+                .map(|desc| EventDescription::from(desc))
+                .collect(),
+            affected_entities: item
+                .affected_entities
+                .into_iter()
+                .map(|entity| Entity::from(entity))
+                .collect(),
+        }
+    }
+}
+
+impl From<EventDescriptionHelper> for EventDescription {
+    fn from(item: EventDescriptionHelper) -> Self {
+        EventDescription {
+            language: item.language,
+            latest_description: item.latest_description,
+        }
+    }
+}
+
+impl From<TagHelper> for Tag {
+    fn from(item: TagHelper) -> Self {
+        Tag {
+            key: item.key,
+            value: item.value,
+        }
+    }
+}
+
+impl From<EntityHelper> for Entity {
+    fn from(item: EntityHelper) -> Self {
+        Entity {
+            entity_value: item.entity_value,
+            tags: item.tags.into_iter().map(|tag| Tag::from(tag)).collect(),
+        }
+    }
+}
 
 struct ActUtils;
-
 impl Utils for ActUtils {
     fn list_tables() -> Result<String, String> {
         //Spawning tokio runtime to run the async call in a sync context
@@ -54,6 +136,15 @@ impl Utils for ActUtils {
             });
         let res = rt.block_on(list_tables());
         res
+    }
+}
+
+impl AlarmConnectorDef for ActUtils {
+    fn parse(input: wit_bindgen::rt::string::String) -> Result<AlarmEvent, String> {
+        let alarm_helper: AlarmEventHelper =
+            serde_json::from_str(input.as_str()).map_err(|err| err.to_string())?;
+
+        Ok(AlarmEvent::from(alarm_helper))
     }
 }
 

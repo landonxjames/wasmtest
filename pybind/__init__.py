@@ -1,3 +1,4 @@
+from .exports import alarm_connector_def
 from .imports import RootImports, http_client
 from .intrinsics import _clamp, _decode_utf8, _encode_utf8, _list_canon_lift, _list_canon_lower, _load, _store
 from .types import Err, Ok, Result
@@ -96,14 +97,20 @@ class Root:
             lowering3,
             instance0["$imports"],
         ]).exports(store)
-        post_return0 = instance1["cabi_post_list-tables"]
+        post_return0 = instance1["cabi_post_act:utils/alarm-connector-def#parse"]
         assert(isinstance(post_return0, wasmtime.Func))
         self._post_return0 = post_return0
-        lift_callee0 = instance1["list-tables"]
+        post_return1 = instance1["cabi_post_list-tables"]
+        assert(isinstance(post_return1, wasmtime.Func))
+        self._post_return1 = post_return1
+        lift_callee0 = instance1["act:utils/alarm-connector-def#parse"]
         assert(isinstance(lift_callee0, wasmtime.Func))
         self.lift_callee0 = lift_callee0
+        lift_callee1 = instance1["list-tables"]
+        assert(isinstance(lift_callee1, wasmtime.Func))
+        self.lift_callee1 = lift_callee1
     def list_tables(self, caller: wasmtime.Store) -> Result[str, str]:
-        ret = self.lift_callee0(caller)
+        ret = self.lift_callee1(caller)
         assert(isinstance(ret, int))
         load = _load(ctypes.c_uint8, self._core_memory0, caller, ret, 0)
         expected: Result[str, str]
@@ -123,5 +130,7 @@ class Root:
             expected = Err(list7)
         else:
             raise TypeError("invalid variant discriminant for expected")
-        self._post_return0(caller, ret)
+        self._post_return1(caller, ret)
         return expected
+    def alarm_connector_def(self) -> alarm_connector_def.AlarmConnectorDef:
+        return alarm_connector_def.AlarmConnectorDef(self)
